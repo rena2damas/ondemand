@@ -30,7 +30,7 @@ class ResourceMgrAdapter
     cluster = cluster_for_host_id(host)
     select = "select=#{workflow.num_nodes}"
     select.concat(":ncpus=#{workflow.cpu_cores}")
-    select.concat(":memory=#{workflow.memory}")
+    select.concat(":memory=#{workflow.memory}Gb")
     script = OodCore::Job::Script.new(
       content: script_path.read,
       accounting_id: account_string,
