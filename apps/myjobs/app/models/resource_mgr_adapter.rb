@@ -36,6 +36,7 @@ class ResourceMgrAdapter
       accounting_id: account_string,
       job_array_request: workflow.job_array_request.presence,
       copy_environment: workflow.copy_environment.eql?("1") ? true: false,
+      queue_name: workflow.queue_name,
       native: ["-l #{select}"]
     )
     adapter(cluster).submit( script, **depends_on)
