@@ -1,6 +1,6 @@
 <%# Uses rails_bootstrap_form gem. API at: https://github.com/bootstrap-ruby/rails-bootstrap-forms %>
 
-<%= bootstrap_form_for(workflow) do |f| %>
+<%= bootstrap_form_for(workflow, layout: :inline) do |f| %>
     <%= f.alert_message t('jobcomposer.options_errors') %>
 
     <%= f.text_field :name, label: "Job Name" %>
@@ -8,8 +8,7 @@
 
     <%# select in bootstrap_form?@%>
 
-    
-    <%= f.select :script_path, grouped_options_for_select(workflow.grouped_script_options, workflow.script_path), { label: t('jobcomposer.options_script_title'), help: t('jobcomposer.options_script_help') }, { class: "selectpicker", id: "workflow_script_path" }  %>
+    <%= f.select :script_path, grouped_options_for_select(workflow.grouped_script_options, workflow.script_path), { label: "job Script", help: t('jobcomposer.options_script_help') }, { class: "selectpicker", id: "workflow_script_path" }  %>
 
     <%= render partial: "edit_form_job_attrs", locals: { f: f } %>
 
