@@ -8,7 +8,7 @@ class Workflow < ApplicationRecord
   # add accessors: [ :attr1, :attr2 ] etc. when you want to add getters and
   # setters to add new attributes stored in the JSON store
   # don't remove attributes from this list going forward! only deprecate
-  store :job_attrs, coder: JSON, accessors: [:queue_name, :num_nodes, :cpu_cores, :memory]
+  store :job_attrs, coder: JSON, accessors: [:account, :job_array_request, :queue_name, :num_nodes, :cpu_cores, :memory]
 
   attr_accessor :staging_template_dir
 
