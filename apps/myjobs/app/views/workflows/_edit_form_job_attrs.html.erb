@@ -5,6 +5,6 @@
 API at: https://github.com/bootstrap-ruby/rails-bootstrap-forms %>
 
 <%= f.select :queue_name, [["entry"], ["long"]], { selected: "entry", label: "Queue" }, { class: "selectpicker" } %>
-<%= f.number_field :num_nodes, { value: 1, label: "Number of nodes" } %>
-<%= f.number_field :cpu_cores, { value: 1, label: "Number of CPU cores" } %>
-<%= f.number_field :memory, { value: 1, label: "Amount of memory", help: "Value is in Gb" } %>
+<%= f.number_field :num_nodes, { value: (1 unless @workflow.num_nodes?), label: "Number of nodes" } %>
+<%= f.number_field :cpu_cores, { value: (1 unless @workflow.cpu_cores?), label: "Number of CPU cores" } %>
+<%= f.number_field :memory, { value: (1 unless @workflow.memory?), label: "Amount of memory", help: "Value is in Gb" } %>
