@@ -34,12 +34,12 @@ class ResourceMgrAdapter
     script = OodCore::Job::Script.new(
       content: script_path.read,
       accounting_id: account_string,
-      job_array_request: workflow.job_array_request.presence,
-      copy_environment: workflow.copy_environment.eql?("1") ? true: false,
+      job_array_request: false,
+      copy_environment: false,
       queue_name: workflow.queue_name,
       native: ["-l #{select}"]
     )
-    adapter(cluster).submit( script, **depends_on)
+    adapter(cluster).submit(script, **depends_on)
 
   rescue OodCore::JobAdapterError => e
     raise PBS::Error, e.message
