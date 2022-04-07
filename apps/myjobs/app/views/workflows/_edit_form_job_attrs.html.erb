@@ -4,23 +4,7 @@
 
 API at: https://github.com/bootstrap-ruby/rails-bootstrap-forms %>
 
-<%= f.text_field :account,
-        label: t('jobcomposer.options_account_title'),
-        help: t('jobcomposer.options_account_help') if Configuration.show_job_options_account_field?
-%>
-
-<%= f.text_field :queue, help: "Queue to submit to" %>
-
-<% if Workflow.show_job_arrays? %>
-<%= f.text_field :job_array_request,
-        label: t('jobcomposer.options_array_title'),
-        help: Workflow.not_all_clusters_support_job_arrays ?
-                  t('jobcomposer.options_array_help_with_clusters',
-                      cluster_list: Workflow.clusters_not_supporting_job_arrays.join(', '))
-                  :
-                  t('jobcomposer.options_array_help'),
-        placeholder: '1-10'
-%>
-<% end %>
-
-<%= f.check_box :copy_environment, label: t('jobcomposer.options_copy_environment'), default: 0 %>
+<%= f.select :queue_name, [["entry"], ["long"]], { selected: "entry", label: "Queue" }, { class: "selectpicker" } %>
+<%= f.number_field :nodes, 1, label: "Number of nodes" %>
+<%= f.number_field :cores, 1, label: "Number of cores" %>
+<%= f.number_field :memory, 1, label: "Amount of memory (Gb)" %>
