@@ -28,12 +28,15 @@ class ResourceMgrAdapter
     raise OSC::Machete::Job::ScriptMissingError, "#{script_path} does not exist or cannot be read" unless script_path.file? && script_path.readable?
 
     cluster = cluster_for_host_id(host)
+    select = "select=#{workflow.num_nodes}"
+    select.concat(":ncpus=#{workflow.cpu_cores}")
+    select.concat(":memory=#{workflow.memory}")
     script = OodCore::Job::Script.new(
       content: script_path.read,
       accounting_id: account_string,
       job_array_request: workflow.job_array_request.presence,
       copy_environment: workflow.copy_environment.eql?("1") ? true: false,
-      native: ["-l select=#{nodes}"]
+      native: ["-l #{select}"]
     )
     adapter(cluster).submit( script, **depends_on)
 
