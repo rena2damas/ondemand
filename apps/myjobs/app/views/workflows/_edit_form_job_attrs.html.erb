@@ -4,7 +4,7 @@
 
 API at: https://github.com/bootstrap-ruby/rails-bootstrap-forms %>
 
-<%= f.select :queue_name, [["entry"], ["long"]], { selected: "entry", label: "Queue" }, { class: "selectpicker" } %>
+<%= f.select :queue_name, [["entry"], ["long"]], { selected: @workflow.queue_name || "entry", label: "Queue" }, { class: "selectpicker" } %>
 <%= f.number_field :num_nodes, { value: (@workflow.num_nodes || 1), label: "Number of nodes" } %>
 <%= f.number_field :cpu_cores, { value: (@workflow.cpu_cores || 1), label: "Number of CPU cores" } %>
 <%= f.number_field :memory, { value: (@workflow.memory || 1), label: "Amount of memory", help: "Value is in Gb" } %>
