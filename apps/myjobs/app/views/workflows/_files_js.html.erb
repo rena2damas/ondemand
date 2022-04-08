@@ -1,6 +1,17 @@
 <script>
 const csrf_token = document.querySelector('meta[name="csrf-token"]').content;
 
+// this uses event delegation so it captures events even if dom element is recreated
+var clipboardjs = new ClipboardJS('#copy-path');
+clipboardjs.on('success', function(e) {
+  $(e.trigger).tooltip({title: 'Copied path to clipboard!', trigger: 'manual', placement: 'bottom'}).tooltip('show');
+  setTimeout(() => $(e.trigger).tooltip('hide'), 2000);
+  e.clearSelection();
+});
+clipboardjs.on('error', function(e) {
+  e.clearSelection();
+});
+
 history.replaceState({
   currentDirectory: '<%= @path %>',
   currentDirectoryUrl: '<%= files_path(@path) %>',
@@ -12,6 +23,11 @@ $.fn.dataTable.ext.search.push(
       return getShowDotFiles() || ! data[2].startsWith('.');
     }
 )
+
+let actionsBtnTemplate = (function(){
+  let template_str  = $('#actions-btn-template').html();
+  return Handlebars.compile(template_str);
+})();
 
 function update_datatables_status(api){
   // from "function info ( api )" of https://cdn.datatables.net/select/1.3.1/js/dataTables.select.js
@@ -132,7 +148,7 @@ table.on('draw.dtSelect.dt select.dtSelect.dt deselect.dtSelect.dt info.dt', fun
 
 <% unless alert %>
 // initial data load
-// reloadTable();
+reloadTable();
 <% end %>
 
 $('#show-dotfiles').on('change', () => {
@@ -325,6 +341,141 @@ function getFilesAndDirectoriesFromDirectory (directoryReader, oldEntries, logDr
   )
 }
 
+(function(){
+  class EmptyDirCreator extends BasePlugin {
+    constructor (uppy, opts){
+      super(uppy, opts)
+      this.id = this.opts.id || 'EmptyDirUploaderCatcher';
+      this.type = 'acquirer';
+
+      this.empty_dirs = [];
+      this.last_entries = [];
+
+      this.handleRootDrop = this.handleRootDrop.bind(this);
+      this.createEmptyDirs = this.createEmptyDirs.bind(this);
+
+      this.uppy = uppy;
+    }
+
+    handleRootDrop (e) {
+      // from https://github.com/transloadit/uppy/blob/7ce58beeb620df3df0640cb369f5d71e3d3f751f/packages/%40uppy/utils/src/getDroppedFiles/index.js
+      if (e.dataTransfer.items && e.dataTransfer.items[0] && 'webkitGetAsEntry' in e.dataTransfer.items[0]) {
+        // toArray https://github.com/transloadit/uppy/blob/7ce58beeb620df3df0640cb369f5d71e3d3f751f/packages/%40uppy/utils/src/toArray.js#L4
+        let items = Array.prototype.slice.call(e.dataTransfer.items || [], 0);
+        let entries = items.map(i => i.webkitGetAsEntry()).filter(i => i);
+
+        return Promise.all(entries.map(i => getEmptyDirs(i))).then((dirs) => {
+          this.empty_dirs = this.empty_dirs.concat(_.flattenDeep(dirs));
+
+          console.log(this.empty_dirs);
+        });
+      }
+      //else we don't have access to directory information
+    }
+
+    createEmptyDirs (ids) {
+      if(! this.uppy.getState().error){ // avoid creating empty dirs if error occurred during upload
+
+        //TODO: error checking and reporting
+        return Promise.all(this.empty_dirs.map((d) => {
+          // "fullPath" should actually be the path relative to the current directory
+          let filename = _.trimStart(d.fullPath, '/');
+
+          return fetch(`${history.state.currentDirectoryUrl}/${encodeURI(filename)}?dir=true`, {method: 'put', headers: { 'X-CSRF-Token': csrf_token }})
+          //TODO: parse json response verify if there was an error creating directory and handle error
+
+        })).then(() => this.empty_dirs = []);
+      }
+    }
+
+    install () {
+      this.uppy.addPostProcessor(this.createEmptyDirs);
+    }
+
+    uninstall () {
+      this.uppy.removePostProcessor(this.createEmptyDirs);
+    }
+  }
+
+  function closeAndResetUppyModal(uppy){
+    uppy.getPlugin('Dashboard').closeModal();
+    uppy.reset();
+  }
+
+
+  window.uppy = new Uppy({
+
+  });
+  uppy.use(EmptyDirCreator);
+  uppy.use(Dashboard, {
+    trigger: '#upload-btn',
+    fileManagerSelectionType: 'both',
+    disableThumbnailGenerator: true,
+    showLinkToFileUploadResult: false,
+    closeModalOnClickOutside: true,
+    closeAfterFinish: true,
+    allowMultipleUploads: false,
+    onRequestCloseModal: () => closeAndResetUppyModal(uppy),
+    note: 'Empty directories will be included in the upload only when a directory upload is initiated via drag and drop. This is because the File and Directory Entries API is available only on a drop event, not during an input change event.'
+  });
+  uppy.use(XHRUpload, {
+    endpoint: '<%= files_upload_path %>',
+    withCredentials: true,
+    fieldName: 'file',
+    limit: 1,
+    headers: { 'X-CSRF-Token': csrf_token },
+    timeout: 128 * 1000,
+  });
+
+  uppy.on('file-added', (file) => {
+    uppy.setFileMeta(file.id, { parent: history.state.currentDirectory });
+    if(file.meta.relativePath == null && file.data.webkitRelativePath){
+      uppy.setFileMeta(file.id, { relativePath: file.data.webkitRelativePath });
+    }
+  });
+
+  uppy.on('complete', (result) => {
+    if(result.successful.length > 0){
+      reloadTable();
+    }
+  });
+
+  // https://stackoverflow.com/questions/6756583/prevent-browser-from-loading-a-drag-and-dropped-file
+  window.addEventListener("dragover",function(e){
+    e = e || event;
+    e.preventDefault();
+  },false);
+  window.addEventListener("drop",function(e){
+    e = e || event;
+    e.preventDefault();
+  },false);
+
+  $('#directory-contents').on('drop', function(e){
+    this.classList.remove('dragover');
+    console.log('File(s) dropped');
+    // Prevent default behavior (Prevent file from being opened)
+
+    // pass drop event to uppy dashboard
+    uppy.getPlugin('Dashboard').openModal().then(() => uppy.getPlugin('Dashboard').handleDrop(e.originalEvent))
+  });
+
+  $('#directory-contents').on('dragover', function(e){
+    this.classList.add('dragover');
+
+    // Prevent default behavior (Prevent file from being opened)
+    e.preventDefault();
+
+    // specifies what feedback will be shown to the user by setting the dropEffect attribute of the DataTransfer associated with the event
+    // too bad we can't show an indicator (no dragstart/end when dragging from OS to browser)
+    e.originalEvent.dataTransfer.dropEffect = 'copy';
+  });
+
+  $('#directory-contents').on('dragleave', function(e){
+    this.classList.remove('dragover');
+  });
+
+})();
+
 window.onpopstate = function(event){
   // FIXME: handle edge case if state ! exist
   setTimeout(() => {
@@ -420,6 +571,65 @@ $('#directory-contents tbody').on('dblclick', 'tr td:not(:first-child)', functio
     if(a.classList.contains('d')) goto(a.getAttribute("href"));
 });
 
+function clearClipboard(){
+   localStorage.removeItem('filesClipboard');
+}
+
+function updateClipboardFromSelection(){
+  let selection = table.rows({selected: true}).data();
+  if(selection.length == 0){
+    clearClipboard();
+  }
+  else {
+    let clipboardData = {
+      from: history.state.currentDirectory,
+      files: selection.toArray().map((f) => {
+          return { directory: f.type == 'd', name: f.name };
+      })
+    };
+
+    localStorage.setItem('filesClipboard', JSON.stringify(clipboardData));
+  }
+}
+
+function transferFiles(files, action, summary){
+  loading(_.startCase(summary));
+
+  return fetch('<%= transfers_path(format: "json") %>', {
+    method: 'post',
+    body: JSON.stringify({
+      command: action,
+      files: files
+    }),
+    headers: { 'X-CSRF-Token': csrf_token }
+  })
+  .then(response => dataFromJsonResponse(response))
+  .then((data) => {
+
+    if(! data.completed){
+      // was async, gotta report on progress and start polling
+      reportTransfer(data);
+    }
+    else {
+      if(data.target_dir == history.state.currentDirectory){
+        reloadTable();
+      }
+    }
+
+    if(action == 'mv' || action == 'cp'){
+      clearClipboard();
+      updateViewForClipboard();
+    }
+  })
+  .then(() => doneLoading())
+  .catch(e => alertError('Error occurred when attempting to ' + summary, e.message))
+}
+
+const reportTransferTemplate = (function(){
+  let template_str  = $('#transfer-template').html();
+  return Handlebars.compile(template_str);
+})();
+
 function findAndUpdateTransferStatus(data){
   let id = `#${data.id}`;
 
@@ -493,6 +703,82 @@ function removeFiles(files){
   transferFiles(files, "rm", "remove files")
 }
 
+function updateViewForClipboard(){
+  let clipboard = JSON.parse(localStorage.getItem('filesClipboard') || '{}'),
+      template_str  = $('#clipboard-template').html(),
+      template = Handlebars.compile(template_str);
+
+  $('#clipboard').html(template(clipboard));
+
+  $('#clipboard-clear').on("click", () => {
+      clearClipboard();
+      updateViewForClipboard();
+  });
+
+
+  $('#clipboard-copy-to-dir').on("click", () => {
+    let clipboard = JSON.parse(localStorage.getItem('filesClipboard') || 'null');
+
+    if(clipboard){
+      clipboard.to = history.state.currentDirectory;
+
+      if(clipboard.from == clipboard.to){
+        console.error('clipboard from and to are identical')
+
+        // TODO: we want to support this use case
+        // copy and paste as a new filename
+        // but lots of edge cases
+        // (overwrite or rename duplicates)
+        // _copy
+        // _copy_2
+        // _copy_3
+        // _copy_4
+      }
+      else{
+        // [{"/from/file/path":"/to/file/path" }]
+        let files = {};
+        clipboard.files.forEach((f) => {
+          files[`${clipboard.from}/${f.name}`] = `${history.state.currentDirectory}/${f.name}`
+        });
+
+        copyFiles(files, csrf_token);
+      }
+    }
+    else{
+      console.error('files clipboard is empty');
+    }
+  });
+
+  $('#clipboard-move-to-dir').on("click", () => {
+    let clipboard = JSON.parse(localStorage.getItem('filesClipboard') || 'null');
+
+    if(clipboard){
+      clipboard.to = history.state.currentDirectory;
+
+      if(clipboard.from == clipboard.to){
+        console.error('clipboard from and to are identical')
+        // TODO:
+      }
+      else{
+        let files = {};
+        clipboard.files.forEach((f) => {
+          files[`${clipboard.from}/${f.name}`] = `${history.state.currentDirectory}/${f.name}`
+        });
+
+        moveFiles(files, csrf_token);
+      }
+    }
+    else{
+      console.error('files clipboard is empty');
+    }
+  });
+}
+
+$('#copy-move-btn').on("click", () => {
+    updateClipboardFromSelection();
+    updateViewForClipboard();
+});
+
 function deleteFiles(files){
   if(! files.length > 0){
     return;
@@ -518,6 +804,12 @@ $('#delete-btn').on("click", () => {
 
 // TODO: move all functionality out of click handlers to functions
 // TODO: disable copy/move buttons if no local storage
+
+//FIXME: so need to handle updateViewForClipboard based on EVENTS emitted by local storage modifications
+updateViewForClipboard();
+window.addEventListener('storage', () => {
+  updateViewForClipboard();
+});
 
 // if only 1 selected item, do not allow to de-select
 table.on('user-select', function ( e, dt, type, cell, originalEvent  ) {
