@@ -19,7 +19,7 @@
 //= require js-routes
 //= require local_time
 //= require handlebars-4.7.7.min.js
-//= require files/index
+//= require files/index.mjs
 //= require_tree .
 
 jQuery.fn.visible = function() {
