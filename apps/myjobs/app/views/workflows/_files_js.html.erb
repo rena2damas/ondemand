@@ -44,7 +44,7 @@ function reloadTable(url){
             return Promise.resolve(data);
         })
         .catch((e) => {
-            Swal.fire(e.message, `Error occurred when attempting to access ${request_url}`, 'error');
+            alert(e.message, `Error occurred when attempting to access ${request_url}`, 'error');
 
             $('#open-in-terminal-btn').addClass('disabled');
             return Promise.reject(e);
@@ -77,16 +77,10 @@ function goto(url, pushState = true, show_processing_indicator = true) {
 }
 
 function loading(title){
-    Swal.fire({
-        title: title,
-        allowOutsideClick: false,
-        showConfirmButton: false,
-        willOpen: () => { Swal.showLoading()  }
-    });
+
 }
 
 function doneLoading(){
-    Swal.close();
 }
 
 history.replaceState({
@@ -238,93 +232,17 @@ $('#show-owner-mode').on('change', () => {
 });
 
 $('#path-breadcrumbs').on('click', '#goto-btn', function(){
-  Swal.fire({
-    title: 'Change Directory',
-    input: 'text',
-    inputLabel: 'Path',
-    inputValue: history.state.currentDirectory,
-    inputAttributes: {
-      spellcheck: 'false',
-    },
-    showCancelButton: true,
-    inputValidator: (value) => {
-      if (! value || ! value.startsWith('/')) {
-        // TODO: validate filenames against listing
-        return 'Provide an absolute pathname'
-      }
-    }
-  })
-  .then((result) => result.isConfirmed ? Promise.resolve(result.value) : Promise.reject('cancelled'))
-  .then((pathname) => goto('<%= files_path('/') %>' + pathname))
+
 });
 
 $('#new-file-btn').on("click", () => {
-  Swal.fire({
-    title: 'New File',
-    input: 'text',
-    inputLabel: 'Filename',
-    showCancelButton: true,
-    inputValidator: (value) => {
-      if (! value ) {
-        // TODO: validate filenames against listing
-        return 'Provide a non-empty filename.'
-      }
-      else if (value.includes("/")) {
-        // TODO: validate filenames against listing
-        return 'Illegal character (/) not allowed in filename.'
-      }
-    }
-  })
-  .then((result) => result.isConfirmed ? Promise.resolve(result.value) : Promise.reject('cancelled'))
-  .then((filename) => newFile(filename));
+
 });
 
 $('#new-dir-btn').on("click", () => {
-  Swal.fire({
-    title: 'New Directory',
-    input: 'text',
-    inputLabel: 'Directory name',
-    inputAttributes: {
-      spellcheck: 'false',
-    },
-    showCancelButton: true,
-    inputValidator: (value) => {
-      if (! value || value.includes("/")) {
-        // TODO: validate filenames against listing
-        return 'Provide a directory name that does not have / in it'
-      }
-    },
-  })
-  .then((result) => result.isConfirmed ? Promise.resolve(result.value) : Promise.reject('cancelled'))
-  .then((filename) => newDirectory(filename));
+
 });
 
-function downloadDirectory(file) {
-  let filename = $($.parseHTML(file.name)).text(),
-      canDownloadReq = `${history.state.currentDirectoryUrl}/${encodeURI(filename)}?can_download=${Date.now().toString()}`
-
-  loading('preparing to download directory: ' + file.name)
-
-  fetch(canDownloadReq, {
-      method: 'GET',
-      headers: {
-        'X-CSRF-Token': csrf_token,
-        'Accept': 'application/json'
-      }
-    })
-    .then(response => dataFromJsonResponse(response))
-    .then(data => {
-      if (data.can_download) {
-        doneLoading();
-        downloadFile(file)
-      } else {
-        Swal.fire('<%= t('dashboard.files_directory_download_error_modal_title') %>', data.error_message, 'error')
-      }
-    })
-    .catch(e => {
-      Swal.fire('<%= t('dashboard.files_directory_download_error_modal_title') %>', e.message, 'error')
-    })
-}
 
 function downloadFile(file) {
   // creating the temporary iframe is exactly what the CloudCmd does
@@ -344,21 +262,6 @@ function downloadFile(file) {
     document.body.removeChild(iframe);
   }, TIME);
 }
-
-$('#download-btn').on("click", () => {
-  let selection = table.rows({ selected: true }).data();
-  if(selection.length == 0) {
-    Swal.fire('Select a file, files, or directory to download', 'You have selected none.', 'error');
-  }
-  selection.toArray().forEach( (f) => {
-    if(f.type == 'd') {
-      downloadDirectory(f)
-    }
-    else if(f.type == 'f') {
-      downloadFile(f)
-    }
-  })
-});
 
 function getEmptyDirs(entry){
   return new Promise((resolve) => {
@@ -510,7 +413,7 @@ function updateClipboardFromSelection(){
 
 const reportTransferTemplate = (function(){
   let template_str  = $('#transfer-template').html();
-  return Handlebars.compile(template_str);
+  // return Handlebars.compile(template_str);
 })();
 
 function findAndUpdateTransferStatus(data){
@@ -557,7 +460,7 @@ function reportTransfer(data){
       }
     }).fail(function() {
       if (attempts >= 3) {
-        Swal.fire('Operation may not have happened', 'Failed to retrieve file operation status.', 'error');
+        alert('Operation may not have happened', 'Failed to retrieve file operation status.', 'error');
       } else {
         setTimeout(poll, 1000);
         attempts++;
@@ -588,8 +491,8 @@ function removeFiles(files){
 
 function updateViewForClipboard(){
   let clipboard = JSON.parse(localStorage.getItem('filesClipboard') || '{}'),
-      template_str  = $('#clipboard-template').html(),
-      template = Handlebars.compile(template_str);
+      template_str  = $('#clipboard-template').html();
+      // template = Handlebars.compile(template_str);
 
   $('#clipboard').html(template(clipboard));
 
@@ -666,18 +569,6 @@ function deleteFiles(files){
   if(! files.length > 0){
     return;
   }
-
-  Swal.fire({
-    title: files.length == 1 ? `Delete ${files[0]}?` : `Delete ${files.length} selected files?`,
-    text: 'Are you sure you want to delete the files: ' + files.join(', '),
-    showCancelButton: true,
-  })
-  .then((result) => {
-    if(result.isConfirmed){
-      loading('Deleting files...');
-      removeFiles(files.map(f => [history.state.currentDirectory, f].join('/')), csrf_token);
-    }
-  })
 }
 
 $('#delete-btn').on("click", () => {
