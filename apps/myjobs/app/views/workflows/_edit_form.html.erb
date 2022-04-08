@@ -34,4 +34,9 @@
   <tbody>
   </tbody>
 </table>
+<%
+  content_for :head do
+    javascript_pack_tag 'files/index', nonce: true
+  end
+%>
 <%= render partial: "files_js" %>
