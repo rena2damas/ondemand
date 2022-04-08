@@ -1,19 +1,30 @@
+// import ClipboardJS from 'app/javascript/packs/files/clipboard'
+// import Swal from 'sweetalert2'
+// import { Uppy, BasePlugin } from '@uppy/core'
+// import Dashboard from '@uppy/dashboard'
+// import XHRUpload from '@uppy/xhr-upload'
+// import Handlebars from 'handlebars';
+// import _ from 'lodash';
+// import 'datatables.net';
+// import 'datatables.net-bs4/js/dataTables.bootstrap4';
+// import 'datatables.net-select';
+// import 'datatables.net-select-bs4';
 
-window.ClipboardJS = ClipboardJS
-window.Uppy = Uppy
-window.BasePlugin = BasePlugin
-window.Dashboard = Dashboard
-window.XHRUpload = XHRUpload
-window.Swal        = Swal.mixin({
-  showClass: {
-    popup: 'swal2-noanimation',
-    backdrop: 'swal2-noanimation'
-  },
-  hideClass: {
-    popup: '',
-    backdrop: ''
-  }
-});
+// window.ClipboardJS = ClipboardJS
+// window.Uppy = Uppy
+// window.BasePlugin = BasePlugin
+// window.Dashboard = Dashboard
+// window.XHRUpload = XHRUpload
+// window.Swal        = Swal.mixin({
+//   showClass: {
+//     popup: 'swal2-noanimation',
+//     backdrop: 'swal2-noanimation'
+//   },
+//   hideClass: {
+//     popup: '',
+//     backdrop: ''
+//   }
+// });
 window.alertError = alertError;
 window.dataFromJsonResponse = dataFromJsonResponse;
 window.newFile = newFile;
