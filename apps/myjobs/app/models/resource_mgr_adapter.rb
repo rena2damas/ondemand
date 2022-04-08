@@ -35,7 +35,7 @@ class ResourceMgrAdapter
     script = OodCore::Job::Script.new(
       content: script_path.read,
       accounting_id: account_string,
-      job_array_request: 1,
+      #job_array_request: 1,
       copy_environment: false,
       queue_name: workflow.queue_name,
       native: ["-l #{select}", "-l #{walltime}"]
