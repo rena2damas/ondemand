@@ -36,7 +36,7 @@ class ResourceMgrAdapter
       content: script_content(script_path),
       accounting_id: account_string,
       #job_array_request: 1,
-      args: workflow.script_args,
+      args: workflow.script_args.split,
       copy_environment: false,
       queue_name: workflow.queue_name,
       native: ["-l #{select}", "-l #{walltime}"]
