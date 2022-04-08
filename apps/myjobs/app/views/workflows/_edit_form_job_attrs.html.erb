@@ -10,7 +10,11 @@ API at: https://github.com/bootstrap-ruby/rails-bootstrap-forms %>
 <%= f.number_field :memory, { value: (@workflow.memory || 1), label: "Amount of memory (Gb)" } %>
 <%= f.number_field :walltime, { value: (@workflow.walltime || 1), label: "Walltime (hours)", help: "Defaults to queue walltime" } %>
 
-<h4>Application specific fields</h4>
+<div class="row">
+  <div class="col-md-12">
+    <div>Application specific fields</div>
+  </div>
+</div>
 
 <%= f.text_field :script_args, label: "Job Script args" %>
 <%= f.file_field :input_file, label: "Input File" %>
