@@ -35,7 +35,7 @@ window.loading = loading;
 window.doneLoading = doneLoading;
 window.$ = $;
 window.jQuery = jQuery;
-window._ = _;
+// window._ = _;
 window.Handlebars = Handlebars;
 
 function alertError(error_title, error_message){
