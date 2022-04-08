@@ -1,3 +1,4 @@
+<script>
 import ClipboardJS from 'app/javascript/packs/files/clipboard'
 import Swal from 'sweetalert2'
 import { Uppy, BasePlugin } from '@uppy/core'
@@ -128,3 +129,4 @@ function loading(title){
 function doneLoading(){
   Swal.close();
 }
+</script>
