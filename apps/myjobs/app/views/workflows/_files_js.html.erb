@@ -132,7 +132,7 @@ table.on('draw.dtSelect.dt select.dtSelect.dt deselect.dtSelect.dt info.dt', fun
 
 <% unless alert %>
 // initial data load
-reloadTable();
+// reloadTable();
 <% end %>
 
 $('#show-dotfiles').on('change', () => {
@@ -410,7 +410,7 @@ function getFilesAndDirectoriesFromDirectory (directoryReader, oldEntries, logDr
 
   uppy.on('complete', (result) => {
     if(result.successful.length > 0){
-      reloadTable();
+      // reloadTable();
     }
   });
 
