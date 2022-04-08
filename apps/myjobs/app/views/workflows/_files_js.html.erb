@@ -418,14 +418,6 @@ function getFilesAndDirectoriesFromDirectory (directoryReader, oldEntries, logDr
     onRequestCloseModal: () => closeAndResetUppyModal(uppy),
     note: 'Empty directories will be included in the upload only when a directory upload is initiated via drag and drop. This is because the File and Directory Entries API is available only on a drop event, not during an input change event.'
   });
-  uppy.use(XHRUpload, {
-    endpoint: '<%= files_upload_path %>',
-    withCredentials: true,
-    fieldName: 'file',
-    limit: 1,
-    headers: { 'X-CSRF-Token': csrf_token },
-    timeout: 128 * 1000,
-  });
 
   uppy.on('file-added', (file) => {
     uppy.setFileMeta(file.id, { parent: history.state.currentDirectory });
