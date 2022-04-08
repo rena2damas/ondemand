@@ -550,11 +550,6 @@ $('#directory-contents tbody').on('dblclick', 'tr td:not(:first-child)', functio
     if(a.classList.contains('d')) goto(a.getAttribute("href"));
 });
 
-const reportTransferTemplate = (function(){
-  let template_str  = $('#transfer-template').html();
-  return Handlebars.compile(template_str);
-})();
-
 function findAndUpdateTransferStatus(data){
   let id = `#${data.id}`;
 
