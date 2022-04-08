@@ -33,9 +33,10 @@ class ResourceMgrAdapter
     select.concat(":mem=#{workflow.memory}Gb")
     walltime = "Walltime=#{workflow.walltime}:00:00"
     script = OodCore::Job::Script.new(
-      content: script_path.read,
+      content: script_content(script_path),
       accounting_id: account_string,
       #job_array_request: 1,
+      args: workflow.script_args,
       copy_environment: false,
       queue_name: workflow.queue_name,
       native: ["-l #{select}", "-l #{walltime}"]
@@ -66,6 +67,21 @@ class ResourceMgrAdapter
   end
 
   private
+
+  def script_content(path)
+    content = path.read
+    content % {
+      "name": workflow.name,
+      "queue_name": workflow.queue_name,
+      "num_nodes": workflow.num_nodes,
+      "cpu_cores": workflow.cpu_cores,
+      "memory": "#{workflow.memory}Gb",
+      "walltime": "#{workflow.walltime}:00:00",
+      "script_args": workflow.script_args,
+      "input_file": workflow.input_file,
+      "license": workflow.license,
+    }
+  end
 
   def cluster_for_host_id(host)
     raise PBS::Error, "host nil" if host.nil?
