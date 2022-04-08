@@ -31,14 +31,14 @@ class ResourceMgrAdapter
     select = "select=#{workflow.num_nodes}"
     select.concat(":ncpus=#{workflow.cpu_cores}")
     select.concat(":mem=#{workflow.memory}Gb")
-    select.concat(":walltime=#{workflow.walltime}:00:00")
+    walltime = "Walltime=#{workflow.walltime}:00:00"
     script = OodCore::Job::Script.new(
       content: script_path.read,
       accounting_id: account_string,
-      job_array_request: false,
+      job_array_request: 0,
       copy_environment: false,
       queue_name: workflow.queue_name,
-      native: ["-l #{select}"]
+      native: ["-l #{select}", "-l #{walltime}"]
     )
     adapter(cluster).submit(script, **depends_on)
 
