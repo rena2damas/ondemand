@@ -101,11 +101,6 @@ $.fn.dataTable.ext.search.push(
     }
 )
 
-let actionsBtnTemplate = (function(){
-  let template_str  = $('#actions-btn-template').html();
-  return Handlebars.compile(template_str);
-})();
-
 function update_datatables_status(api){
   // from "function info ( api )" of https://cdn.datatables.net/select/1.3.1/js/dataTables.select.js
   let rows    = api.rows( { selected: true } ).flatten().length,
