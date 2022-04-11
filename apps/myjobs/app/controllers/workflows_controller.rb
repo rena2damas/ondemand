@@ -119,7 +119,7 @@ class WorkflowsController < ApplicationController
         File.open(file_path, 'wb') do |file|
           file.write(input_file.read)
         end
-        workflow_params.input_file = file_path
+        workflow_params[:input_file] = file_path
       end
 
       if @workflow.update(workflow_params)
