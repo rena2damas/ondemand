@@ -35,7 +35,7 @@ class ResourceMgrAdapter
     walltime = "Walltime=#{workflow.walltime}:00:00"
     script = OodCore::Job::Script.new(
       content: script_content(script_path),
-      accounting_id: account_string,
+      job_name: workflow.name,
       #job_array_request: 1,
       args: workflow.script_args.split,
       copy_environment: false,
