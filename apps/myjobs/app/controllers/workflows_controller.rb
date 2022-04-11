@@ -114,6 +114,16 @@ class WorkflowsController < ApplicationController
     respond_to do |format|
       if @workflow.update(workflow_params)
         session[:selected_id] = @workflow.id
+
+        unless workflow_params[:input_file].blank?
+          input_file = workflow_params[:input_file]
+          file_path = Pathname.new(@workflow.staged_dir).join(input_file.original_filename)
+          File.open(file_path, 'wb') do |file|
+            file.write(input_file.read)
+          end
+          @workflow.input_file = file_path
+        end
+
         format.html { redirect_to workflows_path, notice: 'Job was successfully updated.' }
         format.json { render :show, status: :ok, location: @workflow }
       else
