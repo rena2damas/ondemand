@@ -16,6 +16,7 @@ API at: https://github.com/bootstrap-ruby/rails-bootstrap-forms %>
   </div>
 </div>
 
-<%= f.text_field :script_args, label: "Job Script args" %>
-<%= f.file_field :input_file, label: "Input File" %>
-<%= f.text_field :license, label: "License" %>
+<%= f.number_field :mpiprocs, { value: @workflow.mpiprocs, label: "mpiprocs" } %>
+<%= f.text_field :script_args, { value: @workflow.script_args, label: "Job Script args" } %>
+<%= f.file_field :input_file, { value: @workflow.input_file, label: "Input File" } %>
+<%= f.text_field :license, { value: @workflow.license, label: "License" } %>

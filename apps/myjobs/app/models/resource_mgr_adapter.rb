@@ -31,6 +31,7 @@ class ResourceMgrAdapter
     select = "select=#{workflow.num_nodes}"
     select.concat(":ncpus=#{workflow.cpu_cores}")
     select.concat(":mem=#{workflow.memory}Gb")
+    select.concat(":mpiprocs=#{workflow.mpiprocs}") unless workflow.mpiprocs.nil? || workflow.mpiprocs == 0
     walltime = "Walltime=#{workflow.walltime}:00:00"
     script = OodCore::Job::Script.new(
       content: script_content(script_path),
