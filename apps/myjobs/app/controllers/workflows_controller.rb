@@ -113,14 +113,14 @@ class WorkflowsController < ApplicationController
 
     respond_to do |format|
 
-      unless workflow_params[:input_file].blank?
-        input_file = workflow_params[:input_file]
-        file_path = Pathname.new(@workflow.staged_dir).join(input_file.original_filename)
-        File.open(file_path, 'wb') do |file|
-          file.write(input_file.read)
-        end
-        workflow_params[:input_file] = file_path
-      end
+      # unless workflow_params[:input_file].blank?
+      #   input_file = workflow_params[:input_file]
+      #   file_path = Pathname.new(@workflow.staged_dir).join(input_file.original_filename)
+      #   File.open(file_path, 'wb') do |file|
+      #     file.write(input_file.read)
+      #   end
+      #   workflow_params[:input_file] = file_path
+      # end
 
       if @workflow.update(workflow_params)
         session[:selected_id] = @workflow.id

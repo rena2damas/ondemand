@@ -19,5 +19,5 @@ API at: https://github.com/bootstrap-ruby/rails-bootstrap-forms %>
 
 <%= f.number_field :mpiprocs, { value: @workflow.mpiprocs, label: "mpiprocs" } %>
 <%= f.text_field :script_args, { value: @workflow.script_args, label: "Job Script args" } %>
-<%= f.select :input_file, Find.find(@workflow.workdir || "/hpc/scratch/#{@workflow.user}").drop(1).select { |f| File.file?(f) }, { label: "Input File"}, { class: "selectpicker" }  %>
+<%= f.text_field :input_file, { value: @workflow.input_file, label: "Input File Path" } %>
 <%= f.text_field :license, { value: @workflow.license, label: "License" } %>
