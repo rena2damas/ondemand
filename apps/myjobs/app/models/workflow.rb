@@ -9,7 +9,7 @@ class Workflow < ApplicationRecord
   # setters to add new attributes stored in the JSON store
   # don't remove attributes from this list going forward! only deprecate
   store :job_attrs, coder: JSON, accessors: [
-    :account, :job_array_request, :queue_name,
+    :account, :job_array_request, :queue_name, :workdir,
     :num_nodes, :cpu_cores, :memory, :walltime,
     :mpiprocs, :script_args, :input_file, :license
   ]
