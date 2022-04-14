@@ -9,7 +9,7 @@ API at: https://github.com/bootstrap-ruby/rails-bootstrap-forms %>
 <%= f.number_field :cpu_cores, { value: (@workflow.cpu_cores || 1), label: "Number of CPU cores" } %>
 <%= f.number_field :memory, { value: (@workflow.memory || 1), label: "Amount of memory (Gb)" } %>
 <%= f.number_field :walltime, { value: (@workflow.walltime || 1), label: "Walltime (hours)", help: "Defaults to queue walltime" } %>
-<%= f.number_field :workdir, { value: (@workflow.workdir || Pathname.new("/hpc/scratch/#{Etc.getpwnam(Etc.getlogin)}")), label: "Work Dir", help: "Defaults to /hpc/scratch/#{user.name}" } %>
+<%= f.number_field :workdir, { value: (@workflow.workdir || Pathname.new("/hpc/scratch/#{Etc.getpwnam(Etc.getlogin)}")), label: "Work Dir", help: "Defaults to /hpc/scratch/#{Etc.getpwnam(Etc.getlogin)}" } %>
 
 <div class="row">
   <div class="col-md-12 page-header">
