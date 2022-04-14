@@ -222,6 +222,10 @@ class Workflow < ApplicationRecord
   #   # CODE HERE
   # end
 
+  def user
+    Etc.getpwnam(Etc.getlogin).name
+  end
+
   # Build an array of Machete jobs that are then submitted to the batch server
   def build_jobs(staged_dir, job_list = [])
     job_list << OSC::Machete::Job.new(
