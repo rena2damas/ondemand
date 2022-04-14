@@ -36,7 +36,7 @@ class ResourceMgrAdapter
     script = OodCore::Job::Script.new(
       content: script_content(script_path),
       job_name: workflow.name,
-      workdir: worflow.workdir,
+      workdir: workflow.workdir,
       #job_array_request: 1,
       args: workflow.script_args.split,
       copy_environment: false,
