@@ -82,6 +82,7 @@ class ResourceMgrAdapter
       "script_args": workflow.script_args,
       "input_file": workflow.input_file,
       "license": workflow.license,
+      "workdir": workflow.workdir,
     }
   end
 
